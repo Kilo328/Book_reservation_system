@@ -22,6 +22,7 @@ bool Student::login()
 	if (m.find_student(s))
 	{
 		cout << "登录成功！" << endl;
+		account = s.account;
 		return true;
 	}
 	else
@@ -90,6 +91,7 @@ void Student::menu()
 				{
 					system("cls");
 					Ordermanage om;
+					om.orderacc = account;
 					om.applyorder();
 					system("pause");
 					system("cls");
@@ -97,35 +99,22 @@ void Student::menu()
 				else if (key == 2)
 				{
 					system("cls");
-					Student s;
-					cout << "请输入您的学号:" << endl;
-					cin >> s.account;
-					cout << "请输入您的密码:" << endl;
-					cin >> s.password;
 					Usermanage m;
 					m.Loadstudent();
-					if (m.find_student(s))
+					Ordermanage om;
+					om.Loadorder();
+					int num = 0;
+					for (vector<Order>::iterator it = om.order_.begin(); it != om.order_.end(); it++)
 					{
-						cout << "验证成功！" << endl;
-						system("pause");
-						system("cls");
-						Ordermanage om;
-						om.Loadorder();
-						int num = 0;
-						for (vector<Order>::iterator it = om.order_.begin(); it != om.order_.end(); it++)
+						if (it->account == account)
 						{
-							if (it->account == s.account)
-							{
-								cout << "预约人学号：" << it->account << " 预约书编号：" << it->num << " 预约书名称：" << it->bookname << " 预约书作者：" << it->aname << endl;
-								num++;
-							}
+							cout << "预约人学号：" << it->account << " 预约书编号：" << it->num << " 预约书名称：" << it->bookname << " 预约书作者：" << it->aname << endl;
+							num++;
 						}
-						if (num == 0)
-							cout << "该学生暂无预约情况!" << endl;
 					}
-					else
+					if (num == 0)
 					{
-						cout << "账号或密码错误！" << endl;
+						cout << "该学生暂无预约情况!" << endl;
 					}
 					system("pause");
 					system("cls");
@@ -133,97 +122,53 @@ void Student::menu()
 				else if (key == 3)
 				{
 					system("cls");
-					Student s;
-					cout << "请输入您的学号:" << endl;
-					cin >> s.account;
-					cout << "请输入您的密码:" << endl;
-					cin >> s.password;
-					Usermanage m;
-					m.Loadstudent();
-					if (m.find_student(s))
+					Ordermanage om;
+					om.Loadorder();
+					int num = 0;
+					for (vector<Order>::iterator it = om.order_.begin(); it != om.order_.end(); )
 					{
-						cout << "验证成功！" << endl;
-						system("pause");
-						system("cls");
-						Ordermanage om;
-						om.Loadorder();
-						int num = 0;
-						for (vector<Order>::iterator it = om.order_.begin(); it != om.order_.end(); it++)
+						if (it->account == account)
 						{
-							if (it->account == s.account)
+							num++;
+							cout << "预约人学号：" << it->account << " 预约书编号：" << it->num << " 预约书名称：" << it->bookname << " 预约书作者：" << it->aname << endl;
+							cout << "是否取消该预约?(是输入‘1’,否则输入其他)" << endl;
+							int key_ = 0;
+							cin >> key_;
+							if (key_ == 1)
 							{
-								num++;
-								cout << "预约人学号：" << it->account << " 预约书编号：" << it->num << " 预约书名称：" << it->bookname << " 预约书作者：" << it->aname << endl;
-								cout << "是否取消该预约?(是输入‘1’)" << endl;
-								int key_ = 0;
-								cin >> key_;
-								if (key_ == 1)
+								cout << "取消预约成功!" << endl;
+								//将预定书容量加1
+								Bookmanage bm;
+								bm.Loadbook();
+								for (vector<Book>::iterator its = bm.book_.begin(); its != bm.book_.end(); its++)
 								{
-									//将预定书容量加1
-									Bookmanage bm;
-									bm.Loadbook();
-									for (vector<Book>::iterator its = bm.book_.begin(); its != bm.book_.end(); its++)
+									if (its->num == it->num)
 									{
-										if (its->num == it->num)
-										{
-											Book b;
-											b.name = its->name;
-											b.num = its->num;
-											b.aname = its->aname;
-											b.size = (its->size) + 1;
-											its = bm.book_.erase(its);
-											bm.book_.push_back(b);
-											bm.Savebook();
-											break;
-										}
-									}
-									it=om.order_.erase(it);
-									om.Saveorder();
-									if (it == om.order_.end())
+										Book b;
+										b.name = its->name;
+										b.num = its->num;
+										b.aname = its->aname;
+										b.size = (its->size) + 1;
+										its = bm.book_.erase(its);
+										bm.book_.push_back(b);
+										bm.Savebook();
 										break;
-									else if (it == om.order_.begin())
-									{
-										num++;
-										cout << "预约人学号：" << it->account << " 预约书编号：" << it->num << " 预约书名称：" << it->bookname << " 预约书作者：" << it->aname << endl;
-										cout << "是否取消该预约?(是输入‘1’)" << endl;
-										int key_ = 0;
-										cin >> key_;
-										if (key_ == 1)
-										{
-											//将预定书容量加1
-											Bookmanage bm;
-											bm.Loadbook();
-											for (vector<Book>::iterator its = bm.book_.begin(); its != bm.book_.end(); its++)
-											{
-												if (its->num == it->num)
-												{
-													Book b;
-													b.name = its->name;
-													b.num = its->num;
-													b.aname = its->aname;
-													b.size = (its->size) + 1;
-													its = bm.book_.erase(its);
-													bm.book_.push_back(b);
-													bm.Savebook();
-													break;
-												}
-											}
-											it = om.order_.erase(it);
-											om.Saveorder();
-											if (it == om.order_.end())
-												break;
-										}
 									}
-									it--;
 								}
+								it = om.order_.erase(it);
+								om.Saveorder();
+								if (it == om.order_.end())
+									break;
+							}
+							else
+							{
+								it++;
+								continue;
 							}
 						}
+
 						if (num == 0)
 							cout << "该学生暂无预约情况!" << endl;
-					}
-					else
-					{
-						cout << "账号或密码错误！" << endl;
 					}
 					system("pause");
 					system("cls");
@@ -242,8 +187,6 @@ void Student::menu()
 					system("cls");
 				}
 			}
-			system("pause");
-			system("cls");
 		}
 		else if (key == 0)//退出
 		{
@@ -258,7 +201,5 @@ void Student::menu()
 			system("pause");
 			system("cls");
 		}
-
 	}
-
 }

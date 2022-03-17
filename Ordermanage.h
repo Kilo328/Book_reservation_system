@@ -27,4 +27,6 @@ public:
 	void Saveorder();
 	//Ô¤Ô¼ÈİÆ÷
 	vector<Order>order_;
+	//Ô¤Ô¼ÈËÕËºÅ
+	string orderacc;
 };
